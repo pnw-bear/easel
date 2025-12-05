@@ -1,6 +1,6 @@
 import { useDispatch } from 'react-redux';
 import { resetPipeline } from '../../store/imageSlice';
-import { RefreshCw } from 'lucide-react';
+import { HelpCircle, Crown } from 'lucide-react';
 
 function Header() {
   const dispatch = useDispatch();
@@ -12,24 +12,25 @@ function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200">
-      <div className="px-8 h-20 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-handwritten font-bold text-gradient">
-            Easel
-          </h1>
-          <span className="text-sm text-gray-500 font-medium">
-            Transform Children's Art
-          </span>
+    <header className="relative h-[70px] border-b border-stone-200/60 flex items-center px-8 bg-parchment paper-texture hidden lg:flex">
+      {/* Watercolor Wash Background */}
+      <div className="absolute inset-0 bg-gradient-to-r from-warm-orange/5 via-cerulean/5 to-indigo/5 pointer-events-none"></div>
+
+      <div className="relative z-10 flex items-center justify-between w-full max-w-7xl mx-auto">
+        <div className="flex items-center gap-6">
+          <h2 className="font-serif text-2xl text-ink-charcoal">Transform Your Art</h2>
         </div>
 
-        <button
-          onClick={handleReset}
-          className="flex items-center gap-2 px-4 py-2 rounded-xl border-2 border-gray-200 hover:border-purple-300 transition-colors"
-        >
-          <RefreshCw className="w-4 h-4" />
-          <span className="text-sm font-medium">Start Over</span>
-        </button>
+        <div className="flex items-center gap-4">
+          <button className="px-4 py-2 text-sm font-sans text-warm-grey hover:text-ink-charcoal transition-colors">
+            <HelpCircle className="w-4 h-4 inline mr-2" />
+            Help
+          </button>
+          <button onClick={handleReset} className="px-5 py-2 bg-ink-charcoal text-white rounded-lg text-sm font-sans shadow-paper hover:bg-ink-red transition-colors">
+            <Crown className="w-4 h-4 inline mr-2" />
+            Start Over
+          </button>
+        </div>
       </div>
     </header>
   );

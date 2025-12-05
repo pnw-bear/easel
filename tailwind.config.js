@@ -7,37 +7,32 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Warm, friendly, artsy palette
-        peach: {
-          50: '#FFF7ED',
-          100: '#FFEDD5',
-          200: '#FED7AA',
+        // UXmagic design colors - artsy, warm palette
+        ink: {
+          red: '#D33A2C',
+          charcoal: '#27272A',
         },
-        coral: {
-          400: '#F472B6',
-          500: '#EC4899',
-          600: '#DB2777',
+        warm: {
+          orange: '#F5A623',
+          yellow: '#F6D547',
+          grey: '#4B4B4B'
         },
-        lavender: {
-          50: '#FAF5FF',
-          100: '#F3E8FF',
-          200: '#E9D5FF',
-        },
+        cerulean: '#2B82C6',
+        indigo: '#3449A6',
+        parchment: '#F5F1E8',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        display: ['Plus Jakarta Sans', 'DM Sans', 'sans-serif'],
-        handwritten: ['Caveat', 'Patrick Hand', 'cursive'],
-      },
-      animation: {
-        'bounce-slow': 'bounce 2s infinite',
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        serif: ['"DM Serif Display"', 'serif'],
+        sans: ['"Inter"', 'sans-serif'],
+        hand: ['"Caveat"', 'cursive'],
       },
       boxShadow: {
-        'purple': '0 10px 30px -10px rgba(147, 51, 234, 0.3)',
-        'pink': '0 10px 30px -10px rgba(236, 72, 153, 0.3)',
-        'orange': '0 10px 30px -10px rgba(251, 146, 60, 0.3)',
-        'colorful': '0 10px 40px -10px rgba(147, 51, 234, 0.2), 0 0 20px -5px rgba(236, 72, 153, 0.15)',
+        'watercolor-orange': '0 12px 28px -8px rgba(245, 166, 35, 0.25), 0 6px 12px -4px rgba(245, 166, 35, 0.15)',
+        'watercolor-blue': '0 12px 28px -8px rgba(43, 130, 198, 0.25), 0 6px 12px -4px rgba(43, 130, 198, 0.15)',
+        'watercolor-purple': '0 12px 28px -8px rgba(52, 73, 166, 0.25), 0 6px 12px -4px rgba(52, 73, 166, 0.15)',
+        'watercolor-red': '0 12px 28px -8px rgba(211, 58, 44, 0.25), 0 6px 12px -4px rgba(211, 58, 44, 0.15)',
+        'paper': '0 2px 8px 0 rgba(0, 0, 0, 0.08), 0 1px 3px -1px rgba(0, 0, 0, 0.06)',
+        'paper-lift': '0 8px 24px -4px rgba(0, 0, 0, 0.12), 0 4px 12px -2px rgba(0, 0, 0, 0.08)',
       },
     },
   },

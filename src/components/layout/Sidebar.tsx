@@ -1,44 +1,40 @@
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { Upload, Sparkles, Paintbrush, Package } from 'lucide-react';
+import { CloudArrowUp, Wand2, Paintbrush, FileDown, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 
 const stages = [
   {
     id: 'upload',
     name: 'Upload',
-    icon: Upload,
-    color: 'orange',
-    bgColor: 'bg-orange-100',
-    textColor: 'text-orange-600',
-    borderColor: 'border-orange-400',
+    subtitle: 'Add your artwork',
+    icon: CloudArrowUp,
+    number: 1,
+    colorClass: 'ink-red',
   },
   {
     id: 'cleaning',
     name: 'Clean',
-    icon: Sparkles,
-    color: 'pink',
-    bgColor: 'bg-pink-100',
-    textColor: 'text-pink-600',
-    borderColor: 'border-pink-400',
+    subtitle: 'Enhance quality',
+    icon: Wand2,
+    number: 2,
+    colorClass: 'ink-red',
   },
   {
     id: 'styling',
     name: 'Style',
+    subtitle: 'Apply filters',
     icon: Paintbrush,
-    color: 'purple',
-    bgColor: 'bg-purple-100',
-    textColor: 'text-purple-600',
-    borderColor: 'border-purple-400',
+    number: 3,
+    colorClass: 'indigo',
   },
   {
     id: 'export',
     name: 'Export',
-    icon: Package,
-    color: 'teal',
-    bgColor: 'bg-teal-100',
-    textColor: 'text-teal-600',
-    borderColor: 'border-teal-400',
+    subtitle: 'Download art',
+    icon: FileDown,
+    number: 4,
+    colorClass: 'cerulean',
   },
 ];
 
@@ -46,83 +42,72 @@ function Sidebar() {
   const currentStage = useSelector((state: RootState) => state.image.currentStage);
 
   return (
-    <aside className="fixed left-0 top-20 bottom-0 w-64 bg-white/50 backdrop-blur-sm border-r border-gray-200 p-6">
-      <nav className="space-y-2">
+    <aside className="w-full lg:w-[250px] bg-parchment border-r border-stone-200/60 flex flex-col shrink-0 hidden lg:flex sidebar-ink-pattern paper-texture">
+      {/* Logo Area */}
+      <div className="px-6 py-8 border-b border-stone-200/40">
+        <div className="flex items-center gap-3 mb-2">
+          <img src="/easel-logo.png" alt="Easel Logo" className="h-12 w-auto object-contain" />
+          <div>
+            <h1 className="font-serif text-3xl text-ink-charcoal leading-none">Easel</h1>
+            <p className="font-hand text-sm text-stone-500 mt-0.5">Art Transformer</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-6 space-y-3">
         {stages.map((stage, index) => {
           const Icon = stage.icon;
           const isActive = currentStage === stage.id;
           const isCompleted = stages.findIndex(s => s.id === currentStage) > index;
 
           return (
-            <div key={stage.id} className="relative">
-              <div
-                className={clsx(
-                  'stage-indicator cursor-pointer',
-                  isActive && 'active'
-                )}
-              >
-                <div
-                  className={clsx(
-                    'w-12 h-12 rounded-full flex items-center justify-center transition-all',
-                    isActive && [stage.bgColor, 'ring-4 ring-purple-100'],
-                    !isActive && isCompleted && 'bg-green-100',
-                    !isActive && !isCompleted && 'bg-gray-100'
-                  )}
-                >
-                  <Icon
-                    className={clsx(
-                      'w-6 h-6',
-                      isActive && stage.textColor,
-                      !isActive && isCompleted && 'text-green-600',
-                      !isActive && !isCompleted && 'text-gray-400'
-                    )}
-                  />
-                </div>
-
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={clsx(
-                        'w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold',
-                        isActive && [stage.bgColor, stage.textColor],
-                        !isActive && isCompleted && 'bg-green-100 text-green-600',
-                        !isActive && !isCompleted && 'bg-gray-100 text-gray-400'
-                      )}
-                    >
-                      {index + 1}
-                    </span>
-                    <span
-                      className={clsx(
-                        'font-bold text-sm',
-                        isActive && 'text-gray-900',
-                        !isActive && 'text-gray-500'
-                      )}
-                    >
-                      {stage.name}
-                    </span>
-                  </div>
-                </div>
+            <div
+              key={stage.id}
+              className={clsx(
+                'group flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300',
+                isActive && 'bg-white shadow-paper border border-stone-100',
+                !isActive && 'hover:bg-white/60'
+              )}
+            >
+              {/* Stage Number with Watercolor Blob */}
+              <div className="relative w-10 h-10 flex items-center justify-center">
+                <div className={clsx(
+                  'absolute inset-0 rounded-full transition-opacity',
+                  isActive && 'watercolor-blob-orange opacity-100',
+                  !isActive && 'opacity-0 group-hover:opacity-100 watercolor-blob-red'
+                )} />
+                <span className={clsx(
+                  'relative font-serif text-xl font-bold transition-colors',
+                  isActive ? 'text-ink-red' : 'text-stone-400 group-hover:text-ink-red'
+                )}>
+                  {stage.number}
+                </span>
               </div>
 
-              {/* Connector line */}
-              {index < stages.length - 1 && (
-                <div
-                  className={clsx(
-                    'absolute left-10 top-full w-0.5 h-2 -mt-1',
-                    isCompleted ? 'bg-green-300' : 'bg-gray-200'
-                  )}
-                />
+              {/* Stage Info */}
+              <div className="flex-1">
+                <div className="font-serif text-base text-ink-charcoal">{stage.name}</div>
+                <div className="text-xs text-stone-500 font-sans">{stage.subtitle}</div>
+              </div>
+
+              {/* Chevron */}
+              {isActive && (
+                <ChevronRight className="w-4 h-4 text-ink-red" />
               )}
             </div>
           );
         })}
       </nav>
 
-      {/* Decorative elements */}
-      <div className="absolute bottom-8 left-6 right-6 p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl">
-        <p className="text-xs text-gray-600 text-center">
-          All processing happens in your browser - no data leaves your device!
-        </p>
+      {/* Privacy Badge */}
+      <div className="px-6 py-6 border-t border-stone-200/40">
+        <div className="p-4 bg-gradient-to-br from-warm-orange/10 to-cerulean/10 rounded-xl">
+          <p className="text-xs text-stone-600 text-center font-sans leading-relaxed">
+            <span className="font-bold">100% Private</span><br />
+            All processing in your browser
+          </p>
+        </div>
       </div>
     </aside>
   );

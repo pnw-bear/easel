@@ -1,25 +1,43 @@
 import { useSelector } from 'react-redux';
 import { RootState } from './store';
 import MainLayout from './components/layout/MainLayout';
+import UploadZone from './components/upload/UploadZone';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
   const currentStage = useSelector((state: RootState) => state.image.currentStage);
 
+  const renderStageContent = () => {
+    switch (currentStage) {
+      case 'upload':
+        return <UploadZone />;
+      case 'cleaning':
+        return (
+          <div className="text-center py-12">
+            <p className="text-lg text-stone-600">Cleaning stage - Coming soon</p>
+          </div>
+        );
+      case 'styling':
+        return (
+          <div className="text-center py-12">
+            <p className="text-lg text-stone-600">Styling stage - Coming soon</p>
+          </div>
+        );
+      case 'export':
+        return (
+          <div className="text-center py-12">
+            <p className="text-lg text-stone-600">Export stage - Coming soon</p>
+          </div>
+        );
+      default:
+        return <UploadZone />;
+    }
+  };
+
   return (
     <>
       <MainLayout>
-        <div className="text-center py-12">
-          <h1 className="text-4xl font-bold text-purple-900 mb-4">
-            Welcome to Easel
-          </h1>
-          <p className="text-lg text-gray-600">
-            Transform your child's drawings into beautiful, print-ready artwork
-          </p>
-          <p className="text-sm text-gray-500 mt-4">
-            Current stage: {currentStage}
-          </p>
-        </div>
+        {renderStageContent()}
       </MainLayout>
       <Toaster position="top-center" />
     </>

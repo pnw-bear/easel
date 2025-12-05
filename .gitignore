@@ -38,3 +38,12 @@ npm-debug.log*
 
 # Claude plans (optional - remove if you want to commit plans)
 .claude/plans/
+
+# Design files (keep locally, don't commit to git)
+design/
+*.png
+*.jpg
+*.jpeg
+!public/**/*.png
+!public/**/*.jpg
+!public/**/*.jpeg

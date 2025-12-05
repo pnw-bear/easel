@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&family=Caveat:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Serif+Display:wght@400&family=Caveat:wght@600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,77 +6,107 @@
 
 @layer base {
   body {
-    @apply bg-gradient-to-br from-peach-50 via-pink-50 to-lavender-50;
-    @apply text-gray-800 font-sans;
+    @apply bg-parchment text-warm-grey font-sans antialiased;
   }
 }
 
 @layer components {
-  .btn-primary {
-    @apply px-7 py-3.5 rounded-full bg-gradient-to-r from-purple-600 to-pink-600;
-    @apply text-white font-bold transition-all duration-300;
-    @apply hover:scale-105 hover:shadow-colorful;
-    @apply active:scale-95;
+  /* Paper Grain Texture */
+  .paper-texture {
+    background-image:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
   }
 
-  .btn-secondary {
-    @apply px-7 py-3.5 rounded-full bg-white border-2 border-purple-400;
-    @apply text-purple-600 font-bold transition-all duration-300;
-    @apply hover:border-purple-600 hover:shadow-purple;
-    @apply active:scale-95;
+  /* Ink Stroke Divider */
+  .ink-divider {
+    @apply h-0.5 relative opacity-15;
+    background: linear-gradient(90deg, transparent, theme('colors.ink.charcoal') 20%, theme('colors.ink.charcoal') 80%, transparent);
   }
 
-  .card {
-    @apply bg-white rounded-3xl p-6 shadow-colorful;
-    @apply transition-all duration-300;
-    @apply hover:-translate-y-1 hover:shadow-2xl;
+  .ink-divider::after {
+    content: '';
+    @apply absolute -top-px left-0 right-0 h-1;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='4' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,2 Q25,1 50,2 T100,2' stroke='%2327272A' stroke-width='0.5' fill='none' opacity='0.3'/%3E%3C/svg%3E") repeat-x;
   }
 
-  .stage-indicator {
-    @apply flex items-center gap-3 p-4 rounded-2xl transition-all duration-300;
-    @apply hover:bg-white/50;
+  /* Watercolor Blob Backgrounds */
+  .watercolor-blob-orange {
+    background: radial-gradient(ellipse at center, rgba(245, 166, 35, 0.15) 0%, rgba(245, 166, 35, 0.05) 50%, transparent 70%);
   }
 
-  .stage-indicator.active {
-    @apply bg-white shadow-lg;
+  .watercolor-blob-blue {
+    background: radial-gradient(ellipse at center, rgba(43, 130, 198, 0.15) 0%, rgba(43, 130, 198, 0.05) 50%, transparent 70%);
+  }
+
+  .watercolor-blob-indigo {
+    background: radial-gradient(ellipse at center, rgba(52, 73, 166, 0.15) 0%, rgba(52, 73, 166, 0.05) 50%, transparent 70%);
+  }
+
+  .watercolor-blob-red {
+    background: radial-gradient(ellipse at center, rgba(211, 58, 44, 0.15) 0%, rgba(211, 58, 44, 0.05) 50%, transparent 70%);
+  }
+
+  /* Hand-drawn Dashed Border */
+  .ink-dashed-border {
+    @apply relative bg-white;
+  }
+
+  .ink-dashed-border::before {
+    content: '';
+    @apply absolute inset-0 rounded-2xl pointer-events-none opacity-30;
+    padding: 2px;
+    background:
+      repeating-linear-gradient(0deg, theme('colors.ink.charcoal') 0px, theme('colors.ink.charcoal') 12px, transparent 12px, transparent 24px),
+      repeating-linear-gradient(90deg, theme('colors.ink.charcoal') 0px, theme('colors.ink.charcoal') 12px, transparent 12px, transparent 24px),
+      repeating-linear-gradient(180deg, theme('colors.ink.charcoal') 0px, theme('colors.ink.charcoal') 12px, transparent 12px, transparent 24px),
+      repeating-linear-gradient(270deg, theme('colors.ink.charcoal') 0px, theme('colors.ink.charcoal') 12px, transparent 12px, transparent 24px);
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+  }
+
+  /* Deckled Edge Effect */
+  .deckled-edge {
+    @apply relative overflow-hidden;
+  }
+
+  .deckled-edge::after {
+    content: '';
+    @apply absolute -inset-px border border-black/5 rounded pointer-events-none;
   }
 }
 
 @layer utilities {
   .text-gradient {
-    @apply bg-gradient-to-r from-purple-600 via-pink-600 to-orange-500;
+    @apply bg-gradient-to-r from-ink-red via-warm-orange to-cerulean;
     @apply bg-clip-text text-transparent;
   }
 }
 
 /* Custom animations */
-@keyframes wiggle {
-  0%, 100% {
-    transform: rotate(-3deg);
-  }
-  50% {
-    transform: rotate(3deg);
-  }
+@keyframes bloom {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
 }
 
-.animate-wiggle {
-  animation: wiggle 1s ease-in-out infinite;
+.hover-bloom:hover {
+  animation: bloom 0.5s ease-out;
 }
 
-/* Loading spinner with gradient */
-@keyframes spin-gradient {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
+@keyframes ink-spread {
+  0% { box-shadow: 0 0 0 0 rgba(211, 58, 44, 0.4); }
+  70% { box-shadow: 0 0 0 8px rgba(211, 58, 44, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(211, 58, 44, 0); }
 }
 
-.spinner-gradient {
-  border: 4px solid transparent;
-  border-top-color: #9333ea;
-  border-right-color: #ec4899;
-  border-radius: 50%;
-  animation: spin-gradient 1s linear infinite;
+.ink-spread-active {
+  animation: ink-spread 1s ease-out;
+}
+
+/* Sidebar Ink Pattern */
+.sidebar-ink-pattern {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,0 L30,60' stroke='%2327272A' stroke-width='0.5' opacity='0.04'/%3E%3C/svg%3E");
+  background-repeat: repeat;
 }
