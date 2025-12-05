@@ -10,6 +10,7 @@ interface CleanedVariant {
 interface ImageState {
   // Upload stage
   originalImageUrl: string | null;
+  rotation: number; // 0, 90, 180, 270 degrees
 
   // Cleaning stage
   cleaningProgress: {
@@ -36,6 +37,7 @@ interface ImageState {
 
 const initialState: ImageState = {
   originalImageUrl: null,
+  rotation: 0,
   cleaningProgress: null,
   cleanedVariants: [],
   selectedVariant: null,
@@ -55,12 +57,22 @@ export const imageSlice = createSlice({
   reducers: {
     setOriginalImage: (state, action: PayloadAction<{ url: string }>) => {
       state.originalImageUrl = action.payload.url;
-      state.currentStage = 'cleaning';
+      state.rotation = 0;
+      // Stay in upload stage to show preview with rotation controls
+    },
+
+    rotateImage: (state, action: PayloadAction<'cw' | 'ccw'>) => {
+      if (action.payload === 'cw') {
+        state.rotation = (state.rotation + 90) % 360;
+      } else {
+        state.rotation = (state.rotation - 90 + 360) % 360;
+      }
     },
 
     setCleaningProgress: (state, action: PayloadAction<{ step: string; progress: number }>) => {
       state.cleaningProgress = action.payload;
       state.isProcessing = true;
+      state.currentStage = 'cleaning';
     },
 
     setCleanedVariants: (state, action: PayloadAction<CleanedVariant[]>) => {
@@ -106,6 +118,7 @@ export const imageSlice = createSlice({
 
 export const {
   setOriginalImage,
+  rotateImage,
   setCleaningProgress,
   setCleanedVariants,
   selectVariant,

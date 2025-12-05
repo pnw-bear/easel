@@ -4,6 +4,7 @@ import { Upload } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setOriginalImage } from '../../store/imageSlice';
 import toast from 'react-hot-toast';
+import heic2any from 'heic2any';
 
 function UploadZone() {
   const dispatch = useDispatch();
@@ -11,7 +12,7 @@ function UploadZone() {
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
 
-    const file = acceptedFiles[0];
+    let file = acceptedFiles[0];
 
     // Validate file size (max 10MB)
     if (file.size > 10 * 1024 * 1024) {
@@ -20,11 +21,31 @@ function UploadZone() {
     }
 
     try {
+      let processedFile: Blob = file;
+
+      // Convert HEIC to JPEG for browser compatibility
+      if (file.type === 'image/heic' || file.name.toLowerCase().endsWith('.heic')) {
+        toast.loading('Converting HEIC image...', { id: 'heic-conversion' });
+        try {
+          const convertedBlob = await heic2any({
+            blob: file,
+            toType: 'image/jpeg',
+            quality: 0.9
+          });
+          processedFile = Array.isArray(convertedBlob) ? convertedBlob[0] : convertedBlob;
+          toast.success('HEIC converted successfully!', { id: 'heic-conversion' });
+        } catch (conversionError) {
+          toast.error('Failed to convert HEIC image. Please use JPG or PNG.', { id: 'heic-conversion' });
+          console.error('HEIC conversion error:', conversionError);
+          return;
+        }
+      }
+
       // Create object URL for preview
-      const url = URL.createObjectURL(file);
+      const url = URL.createObjectURL(processedFile);
 
       dispatch(setOriginalImage({ url }));
-      toast.success('Image uploaded! Processing...', {
+      toast.success('Image uploaded! Check orientation and confirm.', {
         icon: '🎨',
         style: {
           borderRadius: '12px',
