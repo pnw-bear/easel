@@ -6,7 +6,9 @@
 
 @layer base {
   body {
-    @apply bg-parchment text-warm-grey font-sans antialiased;
+    background-color: #F5F1E8; /* parchment */
+    color: #4B4B4B; /* warm-grey */
+    @apply font-sans antialiased;
   }
 }
 
