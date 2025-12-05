@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store';
-import { CloudArrowUp, Wand2, Paintbrush, FileDown, ChevronRight } from 'lucide-react';
+import { Upload, Wand2, Paintbrush, FileDown, ChevronRight } from 'lucide-react';
 import clsx from 'clsx';
 
 const stages = [
@@ -8,7 +8,7 @@ const stages = [
     id: 'upload',
     name: 'Upload',
     subtitle: 'Add your artwork',
-    icon: CloudArrowUp,
+    icon: Upload,
     number: 1,
     colorClass: 'ink-red',
   },

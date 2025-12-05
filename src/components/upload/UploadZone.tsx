@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { CloudArrowUp } from 'lucide-react';
+import { Upload } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { setOriginalImage } from '../../store/imageSlice';
 import toast from 'react-hot-toast';
@@ -71,7 +71,7 @@ function UploadZone() {
         <div className="relative z-10 flex flex-col items-center justify-center">
           {/* Upload Icon with Watercolor Shadow */}
           <div className="w-24 h-24 mb-6 rounded-full bg-white shadow-paper flex items-center justify-center group-hover:shadow-watercolor-orange transition-all duration-300 group-hover:scale-110">
-            <CloudArrowUp className="w-12 h-12 text-ink-charcoal" strokeWidth={1.5} />
+            <Upload className="w-12 h-12 text-ink-charcoal" strokeWidth={1.5} />
           </div>
 
           {/* Heading */}
