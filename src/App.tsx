@@ -1,80 +1,29 @@
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from './store';
-import { setCleaningProgress, setCleanedVariants } from './store/imageSlice';
-import MainLayout from './components/layout/MainLayout';
+import WorkspaceLayout from './components/layout/WorkspaceLayout';
+import CanvasWorkspace from './components/layout/CanvasWorkspace';
 import UploadZone from './components/upload/UploadZone';
-import ImagePreview, { CropBox } from './components/upload/ImagePreview';
-import CleaningPanel from './components/cleaning/CleaningPanel';
 import { Toaster } from 'react-hot-toast';
-import { ImageProcessor } from './services/imageProcessing/ImageProcessor';
-import toast from 'react-hot-toast';
 
 function App() {
-  const dispatch = useDispatch();
-  const currentStage = useSelector((state: RootState) => state.image.currentStage);
-  const originalImageUrl = useSelector((state: RootState) => state.image.originalImageUrl);
-  const rotation = useSelector((state: RootState) => state.image.rotation);
+  const activeTool = useSelector((state: RootState) => state.image.activeTool);
+  const currentImageUrl = useSelector((state: RootState) => state.image.currentImageUrl);
 
-  const handleStartCleaning = async (sensitivity: number, cropBox?: CropBox, displayedSize?: { width: number; height: number }) => {
-    if (!originalImageUrl) return;
-
-    try {
-      dispatch(setCleaningProgress({ step: 'Starting...', progress: 0 }));
-
-      const processor = new ImageProcessor((progress) => {
-        dispatch(setCleaningProgress(progress));
-      });
-
-      const variants = await processor.processImage(originalImageUrl, rotation, { sensitivity, cropBox, displayedImageSize: displayedSize });
-
-      // Convert to Redux format
-      const reduxVariants = variants.map(v => ({
-        id: v.id,
-        name: v.name,
-        type: v.type,
-        thumbnail: v.dataUrl
-      }));
-
-      dispatch(setCleanedVariants(reduxVariants));
-      toast.success('Image cleaned! Choose your favorite variant.');
-    } catch (error) {
-      console.error('Cleaning failed:', error);
-      toast.error('Failed to clean image. Please try again.');
+  const renderContent = () => {
+    // If no image uploaded, show upload zone
+    if (!currentImageUrl && activeTool === 'upload') {
+      return <UploadZone />;
     }
-  };
 
-  const renderStageContent = () => {
-    switch (currentStage) {
-      case 'upload':
-        // Show preview with rotation controls if image is uploaded
-        if (originalImageUrl) {
-          return <ImagePreview onConfirm={handleStartCleaning} />;
-        }
-        return <UploadZone />;
-      case 'cleaning':
-        return <CleaningPanel />;
-      case 'styling':
-        return (
-          <div className="text-center py-12">
-            <p className="text-lg text-stone-600">Styling stage - Coming soon</p>
-          </div>
-        );
-      case 'export':
-        return (
-          <div className="text-center py-12">
-            <p className="text-lg text-stone-600">Export stage - Coming soon</p>
-          </div>
-        );
-      default:
-        return <UploadZone />;
-    }
+    // Otherwise show canvas workspace
+    return <CanvasWorkspace />;
   };
 
   return (
     <>
-      <MainLayout>
-        {renderStageContent()}
-      </MainLayout>
+      <WorkspaceLayout>
+        {renderContent()}
+      </WorkspaceLayout>
       <Toaster position="top-center" />
     </>
   );

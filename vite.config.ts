@@ -7,7 +7,8 @@ export default defineConfig({
   plugins: [react(), wasm()],
 
   optimizeDeps: {
-    exclude: ['opencv-ts']
+    exclude: ['opencv-ts'],
+    include: ['@imgly/background-removal']
   },
 
   build: {
@@ -16,6 +17,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           'vendor': ['react', 'react-dom', 'react-redux'],
+          'ai-models': ['@imgly/background-removal'],
           'tensorflow': ['@tensorflow/tfjs', '@tensorflow/tfjs-backend-webgl'],
           'opencv': ['opencv-ts'],
           'ui': ['framer-motion', 'react-dropzone', 'react-hot-toast']

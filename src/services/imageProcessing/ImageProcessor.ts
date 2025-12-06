@@ -1,7 +1,9 @@
 /**
  * ImageProcessor - Enhanced service for aggressively cleaning artwork images
- * Features: Auto-crop, aggressive background removal, stroke extraction
+ * Features: Auto-crop, AI background removal, stroke extraction
  */
+
+import { AIBackgroundRemover } from './AIBackgroundRemover';
 
 export interface ProcessingProgress {
   step: string;
@@ -23,21 +25,20 @@ export interface CropBox {
 }
 
 export interface CleaningOptions {
-  sensitivity: number; // 0-100, higher = more aggressive removal
+  sensitivity: number; // 0-100, now controls post-processing refinement
   cropBox?: CropBox; // User-defined crop area (in display pixels)
   displayedImageSize?: { width: number; height: number }; // Size of image as displayed in browser
+  useAI?: boolean; // Default: true, set false for legacy threshold algorithm
 }
 
 export class ImageProcessor {
   private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
   private onProgress?: (progress: ProcessingProgress) => void;
 
   constructor(onProgress?: (progress: ProcessingProgress) => void) {
     this.canvas = document.createElement('canvas');
     const ctx = this.canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) throw new Error('Failed to get canvas context');
-    this.ctx = ctx;
     this.onProgress = onProgress;
   }
 
@@ -62,7 +63,9 @@ export class ImageProcessor {
       : this.autoCrop(rotatedCanvas);
 
     this.reportProgress('Removing background...', 35);
-    const cleanedCanvas = this.aggressiveBackgroundRemoval(croppedCanvas, options.sensitivity);
+    const cleanedCanvas = options.useAI === false
+      ? this.legacyBackgroundRemoval(croppedCanvas, options.sensitivity)
+      : await this.aiBackgroundRemoval(croppedCanvas, options.sensitivity);
 
     // Generate variants
     const variants: CleanedVariant[] = [];
@@ -240,9 +243,77 @@ export class ImageProcessor {
   }
 
   /**
-   * Aggressive background removal: Only keep vibrant, colorful strokes
+   * AI-powered background removal using @imgly/background-removal
    */
-  private aggressiveBackgroundRemoval(sourceCanvas: HTMLCanvasElement, sensitivity: number): HTMLCanvasElement {
+  private async aiBackgroundRemoval(
+    sourceCanvas: HTMLCanvasElement,
+    sensitivity: number
+  ): Promise<HTMLCanvasElement> {
+    try {
+      // Check if model needs initialization
+      if (!AIBackgroundRemover.isModelLoaded()) {
+        this.reportProgress('Downloading AI model (one-time setup)...', 40);
+        await AIBackgroundRemover.initialize((progress) => {
+          this.reportProgress(`Loading model... ${progress}%`, 40 + progress * 0.1);
+        });
+      }
+
+      this.reportProgress('Analyzing artwork...', 50);
+
+      // Convert canvas to ImageBitmap for better performance
+      const imageBitmap = await createImageBitmap(sourceCanvas);
+
+      // Map sensitivity (0-100) to post-processing options
+      // Higher sensitivity = crisper edges, less feathering, more aggressive alpha cutoff
+      const postProcessing = {
+        featherEdges: Math.max(0, 100 - sensitivity), // Higher sens = less feathering
+        alphaThreshold: sensitivity * 2.55, // 0-100 → 0-255
+      };
+
+      this.reportProgress('Removing background with AI...', 60);
+
+      // Run AI inference
+      const resultBlob = await AIBackgroundRemover.removeBackground(imageBitmap, {
+        model: 'medium',
+        postProcessing,
+        onProgress: (key: string, current: number, total: number) => {
+          const progress = 60 + (current / total) * 20;
+          this.reportProgress(`Processing... ${Math.round(progress)}%`, progress);
+        }
+      });
+
+      this.reportProgress('Finalizing extraction...', 85);
+
+      // Convert blob back to canvas
+      const resultCanvas = await this.blobToCanvas(resultBlob);
+
+      return resultCanvas;
+
+    } catch (error) {
+      console.error('AI background removal failed, falling back to legacy:', error);
+      this.reportProgress('Using fallback algorithm...', 40);
+      return this.legacyBackgroundRemoval(sourceCanvas, sensitivity);
+    }
+  }
+
+  /**
+   * Helper: Convert blob to canvas
+   */
+  private async blobToCanvas(blob: Blob): Promise<HTMLCanvasElement> {
+    const img = await this.loadImage(URL.createObjectURL(blob));
+    const canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    const ctx = canvas.getContext('2d')!;
+    ctx.drawImage(img, 0, 0);
+    return canvas;
+  }
+
+  /**
+   * Legacy background removal: Threshold-based algorithm (fallback)
+   * Only keep vibrant, colorful strokes
+   */
+  private legacyBackgroundRemoval(sourceCanvas: HTMLCanvasElement, sensitivity: number): HTMLCanvasElement {
     const canvas = document.createElement('canvas');
     canvas.width = sourceCanvas.width;
     canvas.height = sourceCanvas.height;

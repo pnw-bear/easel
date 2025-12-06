@@ -112,3 +112,43 @@
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,0 L30,60' stroke='%2327272A' stroke-width='0.5' opacity='0.04'/%3E%3C/svg%3E");
   background-repeat: repeat;
 }
+
+/* Hide scrollbar but keep functionality */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Watercolor Gradient Track for Range Sliders */
+.watercolor-track {
+  background: linear-gradient(90deg,
+    #D33A2C 0%,
+    #F5A623 25%,
+    #F6D547 50%,
+    #2B82C6 75%,
+    #3449A6 100%
+  );
+  opacity: 0.3;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F5F1E8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}

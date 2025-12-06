@@ -44,16 +44,30 @@ function UploadZone() {
       // Create object URL for preview
       const url = URL.createObjectURL(processedFile);
 
-      dispatch(setOriginalImage({ url }));
-      toast.success('Image uploaded! Check orientation and confirm.', {
-        icon: '🎨',
-        style: {
-          borderRadius: '12px',
-          background: '#fff',
-          color: '#27272A',
-          border: '2px solid #D33A2C',
-        },
-      });
+      // Load image to get dimensions
+      const img = new Image();
+      img.onload = () => {
+        // Get file format
+        const format = file.name.split('.').pop()?.toUpperCase() || 'Unknown';
+
+        dispatch(setOriginalImage({
+          url,
+          width: img.width,
+          height: img.height,
+          format
+        }));
+
+        toast.success('Image uploaded successfully!', {
+          icon: '🎨',
+          style: {
+            borderRadius: '12px',
+            background: '#fff',
+            color: '#27272A',
+            border: '2px solid #D33A2C',
+          },
+        });
+      };
+      img.src = url;
     } catch (error) {
       toast.error(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }

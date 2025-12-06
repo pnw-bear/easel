@@ -9,8 +9,15 @@ const rootReducer = combineReducers({
 
 const persistConfig = {
   key: 'root',
-  version: 1,
+  version: 2, // Incremented version to clear old state
   storage,
+  migrate: (state: any) => {
+    // Clear old state structure when version changes
+    if (state && state._persist && state._persist.version !== 2) {
+      return Promise.resolve(undefined);
+    }
+    return Promise.resolve(state);
+  },
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
