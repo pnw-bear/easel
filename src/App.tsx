@@ -15,7 +15,7 @@ function App() {
   const originalImageUrl = useSelector((state: RootState) => state.image.originalImageUrl);
   const rotation = useSelector((state: RootState) => state.image.rotation);
 
-  const handleStartCleaning = async (sensitivity: number, cropBox?: CropBox) => {
+  const handleStartCleaning = async (sensitivity: number, cropBox?: CropBox, displayedSize?: { width: number; height: number }) => {
     if (!originalImageUrl) return;
 
     try {
@@ -25,13 +25,13 @@ function App() {
         dispatch(setCleaningProgress(progress));
       });
 
-      const variants = await processor.processImage(originalImageUrl, rotation, { sensitivity, cropBox });
+      const variants = await processor.processImage(originalImageUrl, rotation, { sensitivity, cropBox, displayedImageSize: displayedSize });
 
       // Convert to Redux format
       const reduxVariants = variants.map(v => ({
         id: v.id,
         name: v.name,
-        type: v.type as 'raw' | 'bold-poster' | 'minimal-line-art',
+        type: v.type,
         thumbnail: v.dataUrl
       }));
 

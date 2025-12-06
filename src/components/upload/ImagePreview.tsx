@@ -12,7 +12,7 @@ interface CropBox {
 }
 
 interface ImagePreviewProps {
-  onConfirm: (sensitivity: number, cropBox?: CropBox) => void;
+  onConfirm: (sensitivity: number, cropBox?: CropBox, displayedSize?: { width: number; height: number }) => void;
 }
 
 function ImagePreview({ onConfirm }: ImagePreviewProps) {
@@ -34,25 +34,34 @@ function ImagePreview({ onConfirm }: ImagePreviewProps) {
 
     const img = imageRef.current;
     if (!img.complete) {
-      img.onload = () => detectCropBox();
+      img.onload = () => {
+        // Wait for next frame to ensure layout is complete
+        requestAnimationFrame(() => detectCropBox());
+      };
     } else {
-      detectCropBox();
+      // Wait for next frame to ensure layout is complete after rotation
+      requestAnimationFrame(() => detectCropBox());
     }
   }, [originalImageUrl, rotation]);
 
   const detectCropBox = () => {
-    if (!imageRef.current) return;
+    if (!imageRef.current || !containerRef.current) return;
 
     const img = imageRef.current;
-    const rect = img.getBoundingClientRect();
+    const imgRect = img.getBoundingClientRect();
+    const containerRect = containerRef.current.getBoundingClientRect();
 
-    // Start with 10% margin as default
+    // Calculate image position relative to container
+    const imgLeft = imgRect.left - containerRect.left;
+    const imgTop = imgRect.top - containerRect.top;
+
+    // Start with 10% margin relative to image
     const margin = 0.1;
     setCropBox({
-      x: rect.width * margin,
-      y: rect.height * margin,
-      width: rect.width * (1 - 2 * margin),
-      height: rect.height * (1 - 2 * margin)
+      x: imgLeft + (imgRect.width * margin),
+      y: imgTop + (imgRect.height * margin),
+      width: imgRect.width * (1 - 2 * margin),
+      height: imgRect.height * (1 - 2 * margin)
     });
   };
 
@@ -68,11 +77,16 @@ function ImagePreview({ onConfirm }: ImagePreviewProps) {
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (!containerRef.current || !cropBox) return;
+    if (!containerRef.current || !cropBox || !imageRef.current) return;
 
-    const rect = containerRef.current.getBoundingClientRect();
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const mouseX = e.clientX - containerRect.left;
+    const mouseY = e.clientY - containerRect.top;
+
+    // Get image bounds in container coordinates
+    const imgRect = imageRef.current.getBoundingClientRect();
+    const imgLeft = imgRect.left - containerRect.left;
+    const imgTop = imgRect.top - containerRect.top;
 
     // Handle dragging (move entire box)
     if (isDragging) {
@@ -80,13 +94,15 @@ function ImagePreview({ onConfirm }: ImagePreviewProps) {
       const y = mouseY - dragStart.y;
 
       // Constrain to image bounds
-      const maxX = rect.width - cropBox.width;
-      const maxY = rect.height - cropBox.height;
+      const minX = imgLeft;
+      const minY = imgTop;
+      const maxX = imgLeft + imgRect.width - cropBox.width;
+      const maxY = imgTop + imgRect.height - cropBox.height;
 
       setCropBox({
         ...cropBox,
-        x: Math.max(0, Math.min(x, maxX)),
-        y: Math.max(0, Math.min(y, maxY))
+        x: Math.max(minX, Math.min(x, maxX)),
+        y: Math.max(minY, Math.min(y, maxY))
       });
     }
 
@@ -120,9 +136,9 @@ function ImagePreview({ onConfirm }: ImagePreviewProps) {
 
       // Constrain to minimum size and image bounds
       if (newBox.width >= minSize && newBox.height >= minSize &&
-          newBox.x >= 0 && newBox.y >= 0 &&
-          newBox.x + newBox.width <= rect.width &&
-          newBox.y + newBox.height <= rect.height) {
+          newBox.x >= imgLeft && newBox.y >= imgTop &&
+          newBox.x + newBox.width <= imgLeft + imgRect.width &&
+          newBox.y + newBox.height <= imgTop + imgRect.height) {
         setCropBox(newBox);
       }
     }
@@ -142,6 +158,38 @@ function ImagePreview({ onConfirm }: ImagePreviewProps) {
 
   const resetCropBox = () => {
     detectCropBox();
+  };
+
+  // Convert crop box from container coordinates to image-relative coordinates
+  // Returns coordinates relative to the DISPLAYED image (accounting for rotation)
+  const convertCropBoxToImageCoordinates = (containerCropBox: CropBox): CropBox => {
+    if (!imageRef.current || !containerRef.current) return containerCropBox;
+
+    const imgRect = imageRef.current.getBoundingClientRect();
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const imgLeft = imgRect.left - containerRect.left;
+    const imgTop = imgRect.top - containerRect.top;
+
+    // Convert from container coordinates to image-displayed coordinates
+    // These are relative to the displayed (possibly rotated) image
+    return {
+      x: containerCropBox.x - imgLeft,
+      y: containerCropBox.y - imgTop,
+      width: containerCropBox.width,
+      height: containerCropBox.height
+    };
+  };
+
+  const handleConfirm = () => {
+    if (cropBox && imageRef.current) {
+      const imageCropBox = convertCropBoxToImageCoordinates(cropBox);
+      const imgRect = imageRef.current.getBoundingClientRect();
+      const displayedSize = { width: imgRect.width, height: imgRect.height };
+
+      onConfirm(sensitivity, imageCropBox, displayedSize);
+    } else {
+      onConfirm(sensitivity);
+    }
   };
 
   if (!originalImageUrl) return null;
@@ -289,7 +337,7 @@ function ImagePreview({ onConfirm }: ImagePreviewProps) {
         {/* Confirm Button */}
         <div className="text-center">
           <button
-            onClick={() => onConfirm(sensitivity, cropBox || undefined)}
+            onClick={handleConfirm}
             className="inline-flex items-center gap-3 px-8 py-4 bg-ink-red text-white rounded-xl font-sans font-semibold text-lg shadow-watercolor-red hover:bg-ink-charcoal transition-all hover:scale-105"
           >
             <Check className="w-6 h-6" />

@@ -25,6 +25,7 @@ export interface CropBox {
 export interface CleaningOptions {
   sensitivity: number; // 0-100, higher = more aggressive removal
   cropBox?: CropBox; // User-defined crop area (in display pixels)
+  displayedImageSize?: { width: number; height: number }; // Size of image as displayed in browser
 }
 
 export class ImageProcessor {
@@ -57,7 +58,7 @@ export class ImageProcessor {
     this.reportProgress('Cropping...', 20);
     // Use manual crop if provided, otherwise auto-detect
     const croppedCanvas = options.cropBox
-      ? this.manualCrop(rotatedCanvas, options.cropBox, img)
+      ? this.manualCrop(rotatedCanvas, options.cropBox, options.displayedImageSize)
       : this.autoCrop(rotatedCanvas);
 
     this.reportProgress('Removing background...', 35);
@@ -115,13 +116,19 @@ export class ImageProcessor {
   /**
    * Manual crop: Apply user-defined crop box
    */
-  private manualCrop(sourceCanvas: HTMLCanvasElement, displayCropBox: CropBox, originalImg: HTMLImageElement): HTMLCanvasElement {
-    // The cropBox is in display coordinates, need to convert to actual image coordinates
-    const displayWidth = originalImg.width;
-    const displayHeight = originalImg.height;
+  private manualCrop(
+    sourceCanvas: HTMLCanvasElement,
+    displayCropBox: CropBox,
+    displayedImageSize?: { width: number; height: number }
+  ): HTMLCanvasElement {
     const actualWidth = sourceCanvas.width;
     const actualHeight = sourceCanvas.height;
 
+    // Use the displayed image size if provided, otherwise fall back to canvas size
+    const displayWidth = displayedImageSize?.width || actualWidth;
+    const displayHeight = displayedImageSize?.height || actualHeight;
+
+    // Calculate scale from displayed size to actual canvas size
     const scaleX = actualWidth / displayWidth;
     const scaleY = actualHeight / displayHeight;
 

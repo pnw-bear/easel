@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface CleanedVariant {
   id: string;
   name: string;
-  type: 'raw' | 'bold-poster' | 'minimal-line-art';
+  type: 'clean' | 'bold-poster' | 'minimal-line-art';
   thumbnail: string;
 }
 
